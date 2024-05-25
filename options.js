@@ -24,27 +24,53 @@ module.exports = {
       keyboard: [
         ["Новый заказ", "Мои заказы"],
         ["Информация", 'Техподдержка'],
-        ["Заказы дропперов"],
+        ["Админ панель"],
       ],
     },
   },
-  infoMenuOptions:{
-reply_markup: JSON.stringify({
-  inline_keyboard: [
-    [
-      {text: "Оформление доставки", callback_data: "/deliveryGuide"},
-      {text: "Образец", callback_data: "/deliveryPrototype"}
-    ],
-    [
-      {text: "Оформление самовывоза", callback_data: "/pickupGuide"},
-      {text: "Образец", callback_data: "/pickupPrototype"}
-    ],
-    [
-      {text: "Особенности оформления", callback_data: "/newOrderDetails"}
-    ]
-  ]
-})
+  adminPanelMenuOptions: {
+    reply_markup:{
+      keyboard:[
+        ["Добавить дроппера", "Удалить дроппера"],
+        ["Список дропперов", "Заказы дропперов"],
+        ["Изменить данные", "Главное меню"]
+      ]
+    }
   },
+  changeInfoOptions:{
+    reply_markup: JSON.stringify({
+      inline_keyboard: [
+        [
+          {text: "Токен Dostavista", callback_data: "/dostavistaToken"},
+          {text: "Адрес Dostavista", callback_data: "/DostavistaURL"}
+        ],
+        [
+          {text: "Телефон менеджера", callback_data: "/managerPhone"},
+          {text: "Группа с заказами", callback_data: "/groupForOrdersID"}
+        ],
+        [
+          {text: "Реквизиты для оплаты", callback_data: "/requisites"}
+          
+        ]
+      ]
+  })},
+  infoMenuOptions:{
+    reply_markup: JSON.stringify({
+      inline_keyboard: [
+        [
+          {text: "Оформление доставки", callback_data: "/deliveryGuide"},
+          {text: "Образец", callback_data: "/deliveryPrototype"}
+        ],
+        [
+          {text: "Оформление самовывоза", callback_data: "/pickupGuide"},
+          {text: "Образец", callback_data: "/pickupPrototype"}
+        ],
+        [
+          {text: "Особенности оформления заявок", callback_data: "/newOrderDetails"}
+          
+        ]
+      ]
+  })},
   orderMenuOptions: {
     reply_markup: JSON.stringify({
       inline_keyboard: [

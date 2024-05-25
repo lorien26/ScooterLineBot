@@ -1,5 +1,10 @@
-function orderHandler(message, получение) {
-  const { requisites, managerPhone } = require("./staticData");
+const {DbApi} = require('./dbAPI.js')
+const db = new DbApi('./mainDB.db')
+
+async function orderHandler(message, получение) {
+  await db.init()
+  const requisites = await db.getData('requisites')
+  const managerPhone = await db.getData('managerPhone')
   class ParseOrder {
     constructor(message, получение) {
       this.комментарий = " ";
@@ -63,7 +68,7 @@ function orderHandler(message, получение) {
     const startM = listOfTime[0].substring(3);
     const endH = listOfTime[1].substring(0, 2);
     const endM = listOfTime[1].substring(3);
-    if (currentDate.getHours() >= +startH || (currentDate.getHours() >= +startH && currentDate.getMinutes() + 10 >= +startM) ) return "Курьер не сможет доставить заказ в указанный промежуток времени"
+    if (currentDate.getHours() >= +startH || (currentDate.getHours() >= +startH && currentDate.getMinutes() + 10 >= +startM) ) return "Время"
     else {
       dateOrder = JSON.stringify(currentDate).substring(
         1,

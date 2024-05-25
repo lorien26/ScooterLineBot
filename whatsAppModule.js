@@ -1,9 +1,13 @@
+const {DbApi} = require('./dbAPI.js')
+const db = new DbApi('./mainDB.db')
+
 const {
-  groupForOrdersID,
   apiTokenInstance,
   idInstance,
 } = require("./staticData");
 async function sendMessageWhatsApp(message) {
+  await db.init()
+  const groupForOrdersID = await db.getData('groupForOrdersID')
   console.log("Сработала отправка сообщения в группу заказов");
   await fetch(
     `https://api.green-api.com/waInstance${idInstance}/sendMessage/${apiTokenInstance}

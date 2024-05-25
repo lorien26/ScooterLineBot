@@ -1,6 +1,11 @@
 const { workerData, parentPort } = require("worker_threads");
-const { DostavistaURL, dostavistaToken } = require("./staticData");
-const isReloaded = false
+async function shell(){
+const {DbApi} = require('./dbAPI.js')
+const db = new DbApi('./mainDB.db')
+await db.init()
+const DostavistaURL = await db.getData('DostavistaURL')
+const dostavistaToken = await db.getData('dostavistaToken')
+let isReloaded = false
 let listOfManagersT = workerData;
 console.log("Лист менеджеров: " + listOfManagersT);
 console.log("Воркер инициализирован");
@@ -80,13 +85,14 @@ async function courierSearch(listOfManagersW) {
         );
     }
   }
+  
 }
 
 setInterval(() => {
   courierSearch(listOfManagersT);
   const date = new Date()
- if(date.getHours() >= 22 && !isReloaded){
- 
+ if(date.getHours() === 22 && !isReloaded){
+  isReloaded = true
     parentPort.postMessage(
         {
             type: 'reload'
@@ -94,7 +100,11 @@ setInterval(() => {
     )
     setTimeout(a =>{ listOfManagersT = {}
     console.log("Лист Т очищен")
+    isReloaded = false
 console.log(listOfManagersT)}, 7200000)
+
 
  }
 }, 15000);
+}
+shell()
