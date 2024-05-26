@@ -402,6 +402,7 @@ try{
           if(!(await db.isExists(data))){
             await db.addDropper(data)
             await bot.sendMessage(chatID, "Дроппер добавлен!")
+            return 0;
           }else await bot.sendMessage(chatID, "Такой дроппер уже есть в списке!")
           listOfManagers[chatID].lastAction = null
           return 0;
@@ -409,6 +410,7 @@ try{
           if(await db.isExists(data)){
             await db.deleteDropper(data)
             await bot.sendMessage(chatID, "Дроппер удалён!")
+            return 0;
           }else await bot.sendMessage(chatID, "Такого дроппера нет в списке!")
           listOfManagers[chatID].lastAction = null
           return 0;
@@ -416,13 +418,11 @@ try{
             await db.changeDataInfo('groupForOrdersID', data )
             await bot.sendMessage(chatID, "Успешно! Данные изменены")
             listOfManagers[chatID].lastAction = null
-
             return 0;
           case "requisitesChange":
             await db.changeDataInfo('requisites', data)
             await bot.sendMessage(chatID, "Успешно! Данные изменены")
             listOfManagers[chatID].lastAction = null
-
             return 0;
           case "DostavistaURLChange":
             await db.changeDataInfo('DostavistaURL', data)
@@ -454,7 +454,7 @@ try{
          }
          switch (data) {
            case "Техподдержка":
-             await bot.sendMessage(chatID, supportMessage)
+             await bot.sendMessage(chatID, supportMessage, {reply_markup: JSON.stringify({inline_keyboard: [[{text: "Назад", callback_data: "/cancelSupport"}]]})})
              listOfManagers[managerID].isSupport = true
              break;
            case "/start":
@@ -612,6 +612,10 @@ try{
           "Выберите тип заказа",
           options.orderMenuOptions
         );
+        break;
+        case "/cancelSupport":
+          await bot.sendMessage(chatID, "Создание тикета поддержки отменено")
+          listOfManagers[managerID].isSupport = false
         break;
       case "/deliveryPrototype":
         await bot.sendMessage(chatID, deliveryPrototype, {
