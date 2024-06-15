@@ -7,9 +7,9 @@ async function orderHandler(message, получение) {
   const managerPhone = await db.getData('managerPhone')
   class ParseOrder {
     constructor(message, получение) {
-      this.комментарий = " ";
+      this.комментарий = "Без комментария";
       this.транспорт = 7;
-      this.имя = " ";
+      this.имя = "Не указано";
       let isTime = null
       const listOfObjects = String(message)
         .toLowerCase()
@@ -26,19 +26,33 @@ async function orderHandler(message, получение) {
           arr[1] = String(arr[1]).trim();
         } while (arr[1] !== arr[1].trim());
         if (name === "транспорт") this[name] = Number(arr[1]);
-        else this[name] = arr[1];
+        else this[name] = arr[1];   
+
+
        
       });
       if(isTime) this.время = ":"
       this.получение = получение;
     }
   }
+  function returnOrderAmount(models){
+    // console.log(models)
+    let takingAmount = 0;
+    if(models.split(';').length <= 1){
+        takingAmount+= +(models.split("-"))[1]
+    }
+    else{
+        models.split(";").forEach(a =>{
+            takingAmount+= isNaN(+(a.split("-"))[1]) ? 0 : +(a.split("-"))[1]
+        })
+    }
+    return takingAmount
+  }
   function isValidWithReason(form) {
     if (form.получение == "доставка") {
       if (typeof timeCheck(form.время) === "string") return timeCheck(form.время);
-      if (!form["стоимость с доставкой"]) return "Стоимость с доставкой";
-      if(!form["стоимость без доставки"]) return "Стоимость без доставки"
-      if (!form.модель) return "Модель";
+      if (!form["стоимость товаров"]) return "Стоимость товаров";
+      if(!form["стоимость доставки"]) return "Стоимость доставки";
       if (!form.адрес) return "Адрес";
       if (
         (form["адрес отправки"] !== "южные ворота") &&
@@ -48,8 +62,7 @@ async function orderHandler(message, получение) {
       if (!form.телефон) return "Телефон";
     } else if (form.получение == "самовывоз") {
       if (!form.время) return "Время";
-      if (!form.стоимость) return "Цена";
-      if (!form.модель) return "Модель";
+      if (!form['стоимость товаров']) return "Стоимость товаров";
       if (
         !(form["адрес отправки"] !== "южные ворота") &&
         form["адрес отправки"] !== "тихорецкий бульвар"
@@ -59,30 +72,31 @@ async function orderHandler(message, получение) {
     } else return null;
   }
   function timeCheck(time) {
+    try{
     if(!time) return "Время"
     if(time === ":") return 'В поле Время не должно быть лишних двоеточий ":". Для разделения часов и минут следует использовать "."'
-    if(time !== 'как можно скорее'){
     const currentDate = new Date();
+    if(time !== 'как можно скорее'){
     const listOfTime = time.split('-');
     const startH = listOfTime[0].substring(0, 2);
     const startM = listOfTime[0].substring(3);
     const endH = listOfTime[1].substring(0, 2);
     const endM = listOfTime[1].substring(3);
-    if (currentDate.getHours() >= +startH || (currentDate.getHours() >= +startH && currentDate.getMinutes() + 10 >= +startM) ) return "Время"
+    if (currentDate.getHours() > +startH || (currentDate.getHours() >= +startH && currentDate.getMinutes() + 10 >= +startM) ) return "Время"
     else {
       dateOrder = JSON.stringify(currentDate).substring(
         1,
         JSON.stringify(currentDate).indexOf("T")
-      );
+      );}
       return [
         `${dateOrder}T${startH}:${startM}:00+03:00`,
         `${dateOrder}T${endH}:${endM}:00+03:00`,
       ];
-    }
+    
   }
 else if (time == 'как можно скорее'){
   return [null, null];
-}}
+}}catch(err){console.log(err)}}
 
   function formToOrder(order) {
     function orderCreate(objectToOrder) {
@@ -117,7 +131,7 @@ else if (time == 'как можно скорее'){
           contact_person: { phone: objectToOrder.телефон, name: objectToOrder.имя },
           required_start_datetime: objectToOrder.время1[0],
           required_finish_datetime: objectToOrder.время1[1],
-          taking_amount: objectToOrder["стоимость с доставкой"],
+          taking_amount: +(objectToOrder["стоимость доставки"]) + +(returnOrderAmount(objectToOrder['стоимость товаров'])),
           buyout_amount: "0.00",
           is_order_payment_here: true,
           invisible_mile_navigation_instructions: null, //инстуркции как добраться до места назначения
@@ -129,9 +143,9 @@ else if (time == 'как можно скорее'){
     }
     if (order.получение === "доставка") {
       order.время1 = timeCheck(order.время)
-      if (+order['стоимость с доставкой'] > 49999) {
+      if (+returnOrderAmount(order['стоимость товаров']) > 49999) {
         order.ценаСтраховки = "50000.00";
-      } else order.ценаСтраховки = order['стоимость с доставкой'];
+      } else order.ценаСтраховки = returnOrderAmount(order['стоимость товаров'])
       if (order["адрес отправки"] === "южные ворота") {
         order.instruction = "19я линия, 91 павельон, 9 выход";
         order["адрес отправки1"] = "МКАД 19 км, 20, стр. 1, Москва";
@@ -147,14 +161,12 @@ else if (time == 'как можно скорее'){
   }
 
   const parsedOrder = new ParseOrder(message, получение);
-  console.log("\n\n\n\Ниже ")
-  console.log(parsedOrder.комментарий)
-  console.log(parsedOrder);
+//   console.log("\n\n\n\Ниже ")
   
   if (!isValidWithReason(parsedOrder) && parsedOrder.получение === "доставка") {
     console.log('First if')
     const order = formToOrder(parsedOrder);
-    console.log(order);
+    // console.log(order);
     return {
       isSucessful: true,
       body: order,

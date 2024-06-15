@@ -33,9 +33,46 @@ module.exports = {
       keyboard:[
         ["Добавить дроппера", "Удалить дроппера"],
         ["Список дропперов", "Заказы дропперов"],
-        ["Изменить данные", "Главное меню"]
+        ["Прошлые заказы", "Изменить данные"],
+        ["Перезагрузить бота", "Главное меню"]
       ]
     }
+  },
+  tgGroupDeliveryOptions:{
+    reply_markup: JSON.stringify({
+        inline_keyboard: [
+          [
+            {text: "Отложить", callback_data: `/tgGroupDelay`},
+            {text: "Отменить", callback_data: "/tgGroupCancelDelivery"}
+          ]
+        ]
+    })
+  },
+  tgGroupDeliveryDelayOptions:{
+    reply_markup: JSON.stringify({
+        inline_keyboard: [
+          [
+            {text: "30 минут", callback_data: "/tgGroupDelay30"},
+            {text: "1 час", callback_data: "/tgGroupDelay60"}
+          ],
+          [
+            {text: "1,5 часа", callback_data: "/tgGroupDelay90"},
+            {text: "2 часа", callback_data: "/tgGroupDelay120"}
+          ],
+          [
+            {text: "Назад", callback_data: "/tgGroupBack"}
+          ]
+        ]
+    })
+  },
+  tgGroupPickupOptions:{
+    reply_markup: JSON.stringify({
+        inline_keyboard: [
+          [
+            {text: "Отменить", callback_data: "/tgGroupPickupCancel"}
+          ]
+        ]
+    })
   },
   changeInfoOptions:{
     reply_markup: JSON.stringify({
@@ -88,6 +125,7 @@ module.exports = {
           { text: "Образец формы", callback_data: "/deliveryPrototype" },
           { text: "Как оформлять доставку", callback_data: "/deliveryGuide" },
         ],
+        [{text: "Шаблон заявки", callback_data: "/deliveryTemplate"}],
         [{ text: "Назад", callback_data: "/returnToOrderMenu" }],
       ],
     }),
@@ -99,6 +137,7 @@ module.exports = {
           { text: "Образец формы", callback_data: "/pickupPrototype" },
           { text: "Как оформлять самовывоз", callback_data: "/pickupGuide" },
         ],
+        [{text: "Шаблон заявки", callback_data: "/pickupTemplate"}],
         [{ text: "Назад", callback_data: "/returnToOrderMenu" }],
       ],
     }),
