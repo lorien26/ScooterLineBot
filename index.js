@@ -513,10 +513,10 @@ const tempMsg =
                break;
                case "Перезагрузить бота":
                 if(isAdmin(username)){
+                    await bot.sendMessage(adminID, "Бот перезагружается...\nКоманда вызвана @"+username)
                     await bot.sendMessage(chatID, "Бот перезагружается...")
-                    await bot.sendMessage(adminID, "Бот перезагружается...")
-                    process.exit(0)
-                    return 0;
+                    setTimeout(()=>{process.exit(0)}, 2000)
+                    return;
                   }
              case "Изменить данные":
                if(isAdmin(username)){
