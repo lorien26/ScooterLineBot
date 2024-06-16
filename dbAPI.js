@@ -33,9 +33,9 @@ class DbApi {
         name = name.toLowerCase() 
         console.log(name)
             const result = await this.all(`SELECT * FROM droppers WHERE name = "${name}"`, )
-            console.log(result)
-            console.log("RESULT \n\n\n", (result[1].length))
-            console.log("RESULT \n\n\n", !!(result[1].length))
+            // console.log(result)
+            // console.log("RESULT \n\n\n", (result[1].length))
+            // console.log("RESULT \n\n\n", !!(result[1].length))
             return !!result[1].length;
         }catch(err){
             console.log("Ошибка при работе с SQLite3: function isExists\n", err)

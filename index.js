@@ -7,7 +7,6 @@ await db.defaultValues()
 const telegramAPI = require("node-telegram-bot-api");
 const { Worker } = require("worker_threads");
 let pendingList = []
-const tempMessagesList = [];
 // const token = "6954991532:AAG_sjZUjnbYyyInMqSAViBU-mAdGSNGVNE";
 const token = "7158785775:AAG0AvHBQtWHxvx4yh3rMtt7772kkFJCGrY";
 
@@ -38,7 +37,7 @@ const {
   adminList
 } = require("./staticData");
 console.log("Программа готова к работе!")
-// await bot.sendMessage(adminID, "Бот перезагружен")
+bot.sendMessage(adminID, "Бот перезагружен")
 try{
   function getDayForKeyboard(currentDay, currentMonth, numOfDays){
     const dayInMonth = currentMonth  === 1 || currentMonth === 3 || currentMonth === 5 || currentMonth === 7 || currentMonth === 8 || currentMonth === 10 || currentMonth === 12 ? 31 : 30;
@@ -558,7 +557,8 @@ const tempMsg =
         await bot.sendMessage(chatID, "Вы уже отправили заявку на добавление! Пожалуйста, ожидайте")
        }
        else{
-        await bot.sendMessage(chatID, `К сожалению вас нет в списке пользователей.\nПожалуйста, напишите @sergzvezdilin, чтобы воспользоваться ботом или отправьте запрос на добавление с помощью кнопки ниже`, {reply_markup: JSON.stringify({inline_keyboard: [[{text: "Оставить заявку", callback_data: "pending"}]]})})
+        // await bot.sendMessage(chatID, `К сожалению вас нет в списке пользователей.\nПожалуйста, напишите @sergzvezdilin, чтобы воспользоваться ботом или отправьте запрос на добавление с помощью кнопки ниже`, {reply_markup: JSON.stringify({inline_keyboard: [[{text: "Оставить заявку", callback_data: "pending"}]]})})
+        await bot.sendMessage(chatID, `К сожалению вас нет в списке пользователей.\nПожалуйста, напишите @i_jusp, чтобы воспользоваться ботом или отправьте запрос на добавление с помощью кнопки ниже`, {reply_markup: JSON.stringify({inline_keyboard: [[{text: "Оставить заявку", callback_data: "pending"}]]})})
        }
     }catch(unexpectedError){
         await db.changeDropper(username, null, "lastAction")
@@ -874,7 +874,8 @@ const tempMsg =
         break;
         case "pending": 
         await bot.sendMessage(chatID, "Ваша заявка принята! \nЕсли она будет одобрена, вы получите уведомление")
-        await bot.sendMessage(sergeyChatID, "Запрос на добавление в список дропперов: @" + username, {reply_markup: JSON.stringify({inline_keyboard: [[{text: "Принять", callback_data: JSON.stringify({chatID: chatID, username: username, answer: "applied"})}, {text: "Отказать", callback_data: JSON.stringify({chatID: chatID, username: username, answer: "denied"})}]]})})
+        await bot.sendMessage(adminChatID, "Запрос на добавление в список дропперов: @" + username, {reply_markup: JSON.stringify({inline_keyboard: [[{text: "Принять", callback_data: JSON.stringify({chatID: chatID, username: username, answer: "applied"})}, {text: "Отказать", callback_data: JSON.stringify({chatID: chatID, username: username, answer: "denied"})}]]})})
+        // await bot.sendMessage(sergeyChatID, "Запрос на добавление в список дропперов: @" + username, {reply_markup: JSON.stringify({inline_keyboard: [[{text: "Принять", callback_data: JSON.stringify({chatID: chatID, username: username, answer: "applied"})}, {text: "Отказать", callback_data: JSON.stringify({chatID: chatID, username: username, answer: "denied"})}]]})})
         await db.changeDropper(username, 'pending', "lastAction")
         pendingList.push(username)
         break;
@@ -1001,19 +1002,23 @@ const tempMsg =
         console.log("Сработало ответное сообщение из группы")
             const returnedObject = (await db.getOrderInfoByMessageID(msg.reply_to_message.message_id))
            if(returnedObject){
+            if(text.includes("#comment")){
             await bot.sendMessage(returnedObject.chatID, `Новый комментарий по заказу: \n ${text}`, {
                 reply_to_message_id: returnedObject.tgPrivateMessageID,
                 parse_mode: "html"
             })
-            await bot.sendMessage(tgGroupForOrders, `Комментарий отправлен`, {
+            const tempMsgId = await bot.sendMessage(tgGroupForOrders, `Комментарий отправлен`, {
                 reply_to_message_id: msg.message_id,
                 parse_mode: "html"
             })
+            setTimeout(() =>{bot.deleteMessage(tgGroupForOrders, tempMsgID)},30000)
+        }
            }else{
-            await bot.sendMessage(tgGroupForOrders, `Выбранное сообщение не является заказом`,{
+            const tempMsgID = await bot.sendMessage(tgGroupForOrders, `Выбранное сообщение не является заказом`,{
                 reply_to_message_id: msg.message_id,
                 parse_mode: "html"
             })
+            setTimeout(() =>{bot.deleteMessage(tgGroupForOrders, tempMsgID)},30000)
            }
         }
       }
